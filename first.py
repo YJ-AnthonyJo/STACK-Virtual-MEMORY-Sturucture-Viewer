@@ -126,7 +126,7 @@ def push(CMD):
     
     match = lambda p,x=CMD: bool(p.match(x)) # 함수 설정.
     
-    p = re.compile('^ +.+ +[0-9]+$')
+    p = re.compile('^ *.+ +[0-9]+$')
     if match(p): 
         #마지막 공백이후가 byte를 나타내는 것이라면
         _ = CMD.split()[-1]
