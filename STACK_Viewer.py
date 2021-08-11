@@ -1,13 +1,3 @@
-'''
-save, load기능 구현
-set기능 구현
-delete기능 구현 : STACK중간 값 없애기 혹은 변수(VARIABLES에서) 없애기.
-#...으로 출력할지 전체 다 출력할지 parm으로 지정해주기(해야할것.)
-print명령 => STACK의 데이터 출력.(구현해야)
-push 숫자인 경우 예외처리. -> 아예 새로 명령 구분하자.
-'''
-
-
 import re, os
 from typing import Dict
 try:
