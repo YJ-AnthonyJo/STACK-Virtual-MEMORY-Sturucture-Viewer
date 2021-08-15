@@ -7,7 +7,7 @@ def init():
     print 0:3 => 0~3째 스택데이터를 보여라.
     '''
     if C.CMD == 'print': #STACK출력
-        print_stack(C.STACK)
+        print_stack()
     elif C.CMD == 'print all': #모든 변수 출력
         for name, data in C.VARIABLES.items():
             print(name, '=', data)
@@ -25,9 +25,9 @@ def init():
             elif to == '': #parm이 {숫자:}일 때
                 from_, to = [int(from_), None]
             else: #parm이 {숫자:숫자}일 때
-                from_, to = [int(from_), int(to)]
+                range_ = {'from': int(from_), 'to': int(to)}
             print(f"print {from_ if from_ != None else ''} : {to if to != None else ''}")
-            print_stack(C.STACK[ from_ : to ])
+            print_stack(range_)
 
         else: 
             #변수출력.
@@ -41,7 +41,7 @@ def init():
                 print("Err : Invalid Parameter")
 
 
-def print_stack():
+def print_stack(range_ = {'from': None, 'to' : None}):
     """
     push값 중, sfp가 없으면, 가장 처음 push된 주소를 sfp라고 지정.
     (즉, sfp가 해당 push된 데이터 위에 존재하고 있다고 판단.)

@@ -7,7 +7,7 @@ Contains Useful Function.
 '''
 import re
 import inspect
-
+import config as C
 
 def chk_valid_variable_name(*vars):
     '''
@@ -24,3 +24,8 @@ def chk_valid_variable_name(*vars):
                        https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
             return False
     return True
+def Calc_RDistance( byte, base ):
+        if len(C.STACK) != 0:
+                return C.STACK[-1][base] + byte
+        else:
+                return byte
