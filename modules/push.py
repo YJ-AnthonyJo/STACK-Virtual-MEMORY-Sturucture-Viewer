@@ -55,6 +55,9 @@ def push():
         'dataLength' : int}
     ]
     """
+    if data_string in ['Sfp', 'sFp', 'sfP', 'SFp', 'SfP', 'SFP']: # 현 데이터가 sfp라면
+        reset_RDistance_BP()
+    
     # C.STACK.append( [var, data_string[:byte] , byte ] )
     C.STACK.append({
         'assignedVar' : var, # 해당 데이터에 접근할 수 있는 변수 이름.(string형태)
