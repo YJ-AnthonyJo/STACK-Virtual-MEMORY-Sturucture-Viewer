@@ -2,9 +2,9 @@
 STACK = list() # [ ['{vari}', '{data}', {byte}], ...]
 """
 STACK = [
-    {'assignedVar': str,
-     'RelativeDistance(base: EBP, RBP)': int,
-     'RelativeDistance(base: ESP, RSP)': int,
+    {'data' : str,
+     'assignedVar': str,
+     'RDistance(BP)': int,
      'dataLength' : int}
 ]
 """

@@ -1,8 +1,4 @@
 #! /usr/bin/python3
-from enum import auto
-from typing import Dict
-
-
 import re, os, sys
 sys.path.append(os.path.join(sys.path[0],'modules'))
 

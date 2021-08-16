@@ -36,8 +36,6 @@ def Calc_RDistance( byte ):
         else: return -byte
 
 def reset_RDistance_BP():
-        #for (idx, data) in enumerate(C.STACK):
-        #for rev_idx in range(len(C.STACK), -1, -1):
         """STACK = [
         {'assignedVar': str,
         'RDistance(BP)': int,
@@ -63,3 +61,25 @@ def reset_RDistance_BP():
                                 C.STACK[idx - 1]['RDistance(BP)'] - C.STACK[idx]['DLength']
 
 chk_sfp = lambda data : reset_RDistance_BP() if data in ['sfp', 'Sfp', 'sFp', 'sfP', 'SFp', 'SfP', 'SFP'] else None
+
+
+def get_max(lamb):
+        M = lamb(C.STACK[0])
+        for d in C.STACK[1:]:
+                _ = lamb(d)
+                if M < _: M = _
+        return M
+
+def set_var_and_byte(var):
+        m = re.match(r'(.+) +(\d+)', var)
+        if m:
+            var = m.group(1)
+            byte = int(m.group(2))
+        else:
+            byte = len(C.VARIABLES[var])
+        return var, byte
+
+def ErrMsg(func):
+        print(inspect.cleandoc(f"""Syntax Error. Please Check Manual Using help({func})
+                If Something Wrong with syntax, etc.. Please add Issue at
+                https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))

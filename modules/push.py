@@ -1,7 +1,6 @@
-import re
 from Func import *
 import config as C
-
+import re
 def push():
     
     '''
@@ -17,8 +16,7 @@ def push():
     return값
     None
     ''' 
-    p = re.compile(r'push +\$(.+)= *[\'\"](.*)[\'\"] *(\d*)') 
-    m = p.match(C.CMD)
+    m = re.match(r'push +\$(.+)= *[\'\"](.*)[\'\"] *(\d*)', C.CMD) 
     if m: # for push {$vari1} {=} {'"문자열"'} {#byte}
         var = m.group(1).strip()
         #변수명 valid여부 체크
@@ -34,26 +32,16 @@ def push():
             return
         C.VARIABLES[var] = data_string[:byte]
     else:
-        p = re.compile(r'push +[\'\"](.*)[\'\"] *(\d*)') # for push {'"문자열"'} {#byte}
-        m = p.match(C.CMD)
-        if bool(m): 
+        m = re.match(r'push +[\'\"](.*)[\'\"] *(\d*)', C.CMD) # for push {'"data"'} {#byte}
+        if m: 
             var = ''
             data_string = m.group(1)
             
             byte = m.group(2)
             byte = int(byte) if byte != '' else len(data_string)
         else:
-            print(inspect.cleandoc("""Syntax Error! See valid syntax using help(push)
-                  if you evaluate your expression are rigth, please add issue AT 
-                       https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
+            ErrMsg('push')
             return
-    """
-        STACK = [
-        {'assignedVar': str,
-        'RelativeDistance(base: EBP, RBP)': int,
-        'dataLength' : int}
-        ]
-    """    
     C.STACK.append({
         'data' : data_string,
         'assignedVar' : var, # 해당 데이터에 접근할 수 있는 변수 이름.(string형태)
