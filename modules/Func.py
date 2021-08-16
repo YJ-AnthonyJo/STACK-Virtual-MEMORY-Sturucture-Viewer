@@ -76,7 +76,7 @@ def set_var_and_byte(var):
             var = m.group(1)
             byte = int(m.group(2))
         else:
-            byte = len(C.VARIABLES[var])
+            byte = C.VARIABLES[var]['DLen']
         return var, byte
 
 def ErrMsg(func):
@@ -84,7 +84,8 @@ def ErrMsg(func):
                 If Something Wrong with syntax, etc.. Please add Issue at
                 https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
 
-def chk_var_in_VARIABLES(var):
+def chk_var_in_VARIABLES_(var):
         if var in C.VARIABLES:
             print("This Variable name is already exist, please use other.")
             return
+chk_var_in_VARIABLES = lambda var : True if var in C.VARIABLES else False

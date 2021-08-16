@@ -27,7 +27,7 @@ VARIABLES = {
     'var' = {
         'type' : 'STACKLink',
         'data' : str,
-        'Dlen' : int
+        'DLen' : int
     }
 }
 ```
