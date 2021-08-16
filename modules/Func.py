@@ -83,3 +83,8 @@ def ErrMsg(func):
         print(inspect.cleandoc(f"""Syntax Error. Please Check Manual Using help({func})
                 If Something Wrong with syntax, etc.. Please add Issue at
                 https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
+
+def chk_var_in_VARIABLES(var):
+        if var in C.VARIABLES:
+            print("This Variable name is already exist, please use other.")
+            return

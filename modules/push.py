@@ -2,7 +2,6 @@ from Func import *
 import config as C
 import re
 def push():
-    
     '''
     USEAGE
     1. push {$vari1}{=}{'문자열'} {#byte} #이후 set등으로 접근 가능.
@@ -16,8 +15,10 @@ def push():
     return값
     None
     ''' 
+    # push {$vari1} {=} {'"문자열"'} {#byte}
+    # push 
     m = re.match(r'push +\$(.+)= *[\'\"](.*)[\'\"] *(\d*)', C.CMD) 
-    if m: # for push {$vari1} {=} {'"문자열"'} {#byte}
+    if m: 
         var = m.group(1).strip()
         #변수명 valid여부 체크
         if not chk_valid_variable_name(var):
@@ -27,12 +28,11 @@ def push():
         
         byte = m.group(3)
         byte = int(byte) if byte != '' else len(data_string)
-        if var in C.VARIABLES:
-            print("This Variable name is already exist, please use other.")
-            return
+
         C.VARIABLES[var] = data_string[:byte]
     else:
-        m = re.match(r'push +[\'\"](.*)[\'\"] *(\d*)', C.CMD) # for push {'"data"'} {#byte}
+        # push {'"data"'} {#byte}
+        m = re.match(r'push +[\'\"](.*)[\'\"] *(\d*)', C.CMD) 
         if m: 
             var = ''
             data_string = m.group(1)
