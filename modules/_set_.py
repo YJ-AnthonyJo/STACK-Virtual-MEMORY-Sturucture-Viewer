@@ -1,3 +1,4 @@
+from pyreadline import rlmain
 import config as C
 from Func import *
 import re
@@ -30,7 +31,7 @@ def _set_():
     # set new $vari1 = $vari2 {#length}
     p = re.compile(r'set +new +\$(.+)= *\$(.+)') 
     m = p.match(C.CMD)
-    if bool(m): 
+    if m: 
         var1, var2 = [m.group(i).rstrip() for i in [1,2]]
         
         p = re.compile(r'(.+) +(\d+)')
@@ -76,31 +77,40 @@ def _set_():
         base = base if base != '' else 'ebp'
         
         #상대주소 +num, -num
-        #지금은 +가 구현안되어있기에 -를 기준으로 구현.
-        relativeAddr = - int(m.group(2)) #+구현시 int앞의 -빼고 다른 조건 넣어서 처리해주기.
+        relativeAddr = int(m.group(2)) 
         
         
-        #변수명 받기.
-        vari = m.group(3)
+        #변수명, byte 받기.
+        var = m.group(3)
         p = re.compile(r'(.+) +(\d+)')
-        m = p.match(vari)
+        m = p.match(var)
         if bool(m):
-            vari = m.group(1)
+            var = m.group(1)
             byte = int(m.group(2))
             pass
         else:
-            byte = len(C.VARIABLES[vari])
-        if not chk_valid_variable_name(vari): return #변수명 확인.
+            byte = len(C.VARIABLES[var])
+        if not chk_valid_variable_name(var): return #변수명 확인.
         
         
         
-        # [ ['{vari}', '{data}', {byte}], ...]
-        total = 0
-        for idx, tmp in enumerate(C.STACK):
-            _1, _2, stackByte = tmp
-            total += stackByte
-            if total == relativeAddr:
-                C.STACK.insert(idx, [vari, C.VARIABLES[vari][:byte], byte])
+        """STACK = [
+        {'assignedVar': str,
+        'RDistance(BP)': int,
+        'DLength' : int}
+        ]"""
+        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
+        if idx != None:
+            C.STACK.insert(idx, {
+                'data' : C.VARIABLES[var][:byte],
+                'assignedVar' : var,
+                'RDistance(BP)' : relativeAddr,
+                'DLength' : byte
+            })
+            reset_RDistance_BP()
+        else:
+            print("relative address is invalid.") # ISSUE #21
+        
         return
         
     # set new #ebp-num = 'data' {#length}
@@ -112,8 +122,7 @@ def _set_():
         base = base if base != '' else 'ebp'
         
         #상대주소 +num, -num
-        #지금은 +가 구현안되어있기에 -를 기준으로 구현.
-        relativeAddr = - int(m.group(2)) #+구현시 int앞의 -빼고 다른 조건 넣어서 처리해주기.
+        relativeAddr = int(m.group(2)) 
         
         #데이터 입력받기.
         data = m.group(3)
@@ -122,13 +131,18 @@ def _set_():
         byte = m.group(4)
         byte = int(byte) if byte != '' else len(data)
         
-        # [ ['{vari}', '{data}', {byte}], ...]
-        total = 0
-        for idx, tmp in enumerate(C.STACK):
-            _1, _2, stackByte = tmp
-            total += stackByte
-            if total == relativeAddr:
-                C.STACK.insert(idx, ['', data, byte])
+        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
+        if idx != None:
+            C.STACK.insert(idx, {
+                'data' : data[:byte],
+                'assignedVar' : '',
+                'RDistance(BP)' : relativeAddr,
+                'DLength' : byte
+            })
+            reset_RDistance_BP()
+        else:
+            print("relative address is invalid.") # ISSUE #21
+
         return
 
     "set"
@@ -179,31 +193,33 @@ def _set_():
         base = base if base != '' else 'ebp'
         
         #상대주소 +num, -num
-        #지금은 +가 구현안되어있기에 -를 기준으로 구현.
-        relativeAddr = - int(m.group(2)) #+구현시 int앞의 -빼고 다른 조건 넣어서 처리해주기.
+        relativeAddr = int(m.group(2))
         
         
         #변수명 받기.
-        vari = m.group(3)
+        var = m.group(3)
         p = re.compile(r'(.+) +(\d+)')
-        m = p.match(vari)
+        m = p.match(var)
         if bool(m):
-            vari = m.group(1)
+            var = m.group(1)
             byte = int(m.group(2))
             pass
         else:
-            byte = len(C.VARIABLES[vari])
-        if not chk_valid_variable_name(vari): return #변수명 확인.
+            byte = len(C.VARIABLES[var])
+        if not chk_valid_variable_name(var): return #변수명 확인.
         
         
-        
-        # [ ['{vari}', '{data}', {byte}], ...]
-        total = 0
-        for idx, tmp in enumerate(C.STACK):
-            _1, _2, stackByte = tmp
-            total += stackByte
-            if total == relativeAddr:
-                C.STACK[idx] = [vari, C.VARIABLES[vari][:byte], byte]
+        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
+        if idx != None:
+            C.STACK.insert(idx, {
+                'data' : C.VARIABLES[var][:byte],
+                'assignedVar' : var,
+                'RDistance(BP)' : relativeAddr,
+                'DLength' : byte
+            })
+            reset_RDistance_BP()
+        else:
+            print("relative address is invalid.") # ISSUE #21
         return
     
     # set #ebp-num = 'data' {#length}
@@ -225,11 +241,15 @@ def _set_():
         byte = m.group(4)
         byte = int(byte) if byte != '' else len(data)
         
-        # [ ['{vari}', '{data}', {byte}], ...]
-        total = 0
-        for idx, tmp in enumerate(C.STACK):
-            _1, _2, stackByte = tmp
-            total += stackByte
-            if total == relativeAddr:
-                C.STACK[idx] =  ['', data, byte]
+        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
+        if idx != None:
+            C.STACK.insert(idx, {
+                'data' : data[:byte],
+                'assignedVar' : '',
+                'RDistance(BP)' : relativeAddr,
+                'DLength' : byte
+            })
+            reset_RDistance_BP()
+        else:
+            print("relative address is invalid.") # ISSUE #21
         return

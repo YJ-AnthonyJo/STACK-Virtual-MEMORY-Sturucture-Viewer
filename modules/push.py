@@ -17,7 +17,7 @@ def push():
     return값
     None
     ''' 
-    p = re.compile(r'push \$(.+)= *[\'\"](.*)[\'\"] *(\d*)') 
+    p = re.compile(r'push +\$(.+)= *[\'\"](.*)[\'\"] *(\d*)') 
     m = p.match(C.CMD)
     if m: # for push {$vari1} {=} {'"문자열"'} {#byte}
         var = m.group(1).strip()
@@ -48,17 +48,16 @@ def push():
                        https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
             return
     """
-    STACK = [
+        STACK = [
         {'assignedVar': str,
         'RelativeDistance(base: EBP, RBP)': int,
-        'RelativeDistance(base: ESP, RSP)': int,
         'dataLength' : int}
-    ]
-    """
-    # C.STACK.append( [var, data_string[:byte] , byte ] )
+        ]
+    """    
     C.STACK.append({
+        'data' : data_string,
         'assignedVar' : var, # 해당 데이터에 접근할 수 있는 변수 이름.(string형태)
-        'RDistance(BP)' : Calc_RDistance(byte, 'RDistance(BP)'), # EBP, RSP에서 현 데이터가 떨어진 거리.
-        'RDistance(SP)' : Calc_RDistance(byte, 'RDistance(SP)'), # ESP, ESP에서 현 데이터가 떨어진 거리.
+        'RDistance(BP)' : Calc_RDistance(byte), # EBP, RSP에서 현 데이터가 떨어진 거리.
         'DLength' : byte # 해당 데이터가 가진 크기.
     })
+    chk_sfp(data_string)
