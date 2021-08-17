@@ -74,7 +74,7 @@ def push_var_only(var):
 
 def push_var_new_assignment(var, new):
     # var 새로 assignment.
-    m = re.match(r'(.+)= *([\'\"])(.*)\2 *(\d*)', var) 
+    m = re.match(r'(.+)= *([\'\"])(.*)\2 *(\d*)$', var) 
     if m: 
         # push {$var1} {=} {'"문자열"'} {#byte}
         # push new {$var1} {=} {'"문자열"'} {#byte}
@@ -135,7 +135,7 @@ def push_var_new_assignment(var, new):
             return [False] * 4
 
 def push_data():
-    m = re.match(r'push +([\'\"])(.*)\1 *(\d*)', C.CMD) 
+    m = re.match(r'push +([\'\"])(.*)\1 *(\d*)$', C.CMD) 
     if m: 
         var = ''
         data_string = m.group(2)
