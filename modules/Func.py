@@ -97,8 +97,6 @@ def chk_var_in_VARIABLES(want, var): #want : 바람(원하는 것)
                         return False
                 else: #없고, 없기를 바람
                         return True
-                
-# chk_var_in_VARIABLES = lambda var : True if var in C.VARIABLES else False
 
 def LWS(byte, var):
         if byte >= C.VARIABLES[var]['DLen']:

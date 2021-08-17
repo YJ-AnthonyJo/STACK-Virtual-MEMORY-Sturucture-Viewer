@@ -17,6 +17,7 @@ def push():
     ''' 
     # push {$var1} {#byte}
     # push {$var1} {=} {'"문자열"'} {#byte}
+    # push {$var1} {=} {$var2} {#byte}
     m = re.match(r'push +\$(.+)', C.CMD)
     if m:
         # 변수명 check안해주어도 됨. (이미 var로 존재한다는 것은 통과했다는 것.)
@@ -56,7 +57,7 @@ def push_var_only(var):
         var = var.strip()
         byte = C.VARIABLES[var]['DLen']
     
-    if not chk_var_in_VARIABLES(True, var) : return [False] * 3
+    if not chk_var_in_VARIABLES(True, var) : return [False] * 4
     
     data_string, var = LWS(byte, var)
     
@@ -68,7 +69,7 @@ def push_var_new_assignment(var):
     if m: 
         var = m.group(1).strip()
         if not chk_valid_variable_name(var):
-            return [False] * 3
+            return [False] * 4
         
         data_string = m.group(2)
         
@@ -84,8 +85,33 @@ def push_var_new_assignment(var):
         }
         data_string = '' # LWS : C.VARIABLES의 data로 접근할 것임.(동기화 위해)
         return True, data_string, var, byte
-    else :
-        return [False] * 3
+    else : #var : 't2 = $t1'
+        m = re.match(r'(.+)= *\$(.+)', var) 
+        if m:
+            l_var = m.group(1).strip()
+            if not chk_valid_variable_name(l_var):
+                return [False] * 4
+            r_var = m.group(2).strip()
+            
+            m = re.match(r'(.+) +(\d+)', r_var)
+            if m:
+                r_var = m.group(1)
+                if not chk_var_in_VARIABLES(True, r_var): return [False] * 4
+                byte = int(m.group(2))
+            else:
+                r_var = r_var
+                if not chk_var_in_VARIABLES(True, r_var): return [False] * 4
+                byte = C.VARIABLES[r_var]['DLen']
+            
+            C.VARIABLES[l_var] = {
+                'type' : 'STACKLink',
+                'data' : C.VARIABLES[r_var]['data'][:byte],
+                'DLen' : byte
+            }
+            data_string = ''
+            return True, data_string, l_var, byte
+        else: 
+            return [False] * 4
 
 def push_data():
     m = re.match(r'push +[\'\"](.*)[\'\"] *(\d*)', C.CMD) 
