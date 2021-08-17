@@ -3,7 +3,7 @@ from Func import *
 import re
 
 def _set_():
-    '''
+    r'''
         \\{\\} : 실제로 들어가는 string에서의 {}을 의미.
         ###set###
         
@@ -18,7 +18,7 @@ def _set_():
                 * parm2 == data : 할당할 데이터 크기, push와 동일한 작동기준.
             
         #2 istack : ebp기준의 상대주소 사용.
-            set \{{length}\}{#ebp esp}-{num}={data}
+            set \\{{length}\\}{#ebp esp}-{num}={data}
             * {length} : 수식, 변수($사용) 허용.
             * {#ebp} : 기본값이 ebp(생략가능), esp 사용가능.
             * {num} : ebp로 부터 얼마나 떨어져있는지.
@@ -31,76 +31,50 @@ def _set_():
     # set new $var1 = 'data' {#length}
     m = re.match(r'set +new +\$(.+)= *(.+)', C.CMD)
     if m:
-        var1 = m.group(1).rstrip()
-        if not chk_valid_variable_name(var1) : return
+        '''init'''
+        l_var, r_value = init_set_var(m)
+        if not chk_valid_variable_name(l_var) : return
+        if not chk_var_in_VARIABLES(False, l_var): return
         
+        '''Case'''
         # set new $var1 = $var2 {#length}
-        m1 = re.match(r'\$(.+)', m.group(2))
-        if m1:
-            var2 = m1.group(1).rstrip()
-            var2, byte = set_var_and_byte(var2)
-            if not chk_valid_variable_name(var2): return #변수명 확인.
-            data = C.VARIABLES[var2][:byte]
+        _, data, byte = case_set_var_1(r_value)
         
         # set new $var1 = 'data' {#length}
-        m1 = re.match(r'[\'\"](.*)[\'\"] *(\d*)', m.group(2)) 
-        if m1:
-            data = m1.group(1)
-            byte = m1.group(2)
-            byte = int(byte) if byte != '' else len(data)
-            data = data[:byte]
+        _, data, byte = case_set_var_2(r_value)
         
-        if var1 in C.VARIABLES: #기존에 존재시.
-            print("This Variable name is already exist, please use other.")
+        if not _ :
+            ErrMsg('set')
             return
-        C.VARIABLES[var1] = data
+        
+        '''Adjust to C.VARIABLES'''
+        C.VARIABLES[l_var] = {
+            'type' : 'var',
+            'data' : data,
+            'DLen' : byte
+        }
         return
     
     # set new #ebp-num = $var2 {#length}
     # set new #ebp-num = 'data' {#length}
     m = re.match(r'set +new +(.*)([-+]\d+) *= *(.+)', C.CMD)
     if m:
-        #기준 정하기. esp? ebp?
-        base = m.group(1)
-        base = base if base != '' else 'ebp'
+        '''init'''
+        base, relativeAddr, r_value = init_set_STACK(m)
         
-        #상대주소 +num, -num
-        relativeAddr = int(m.group(2)) 
-        
+        '''Case'''
         # set new #ebp-num = $var2 {#length}
-        m1 = re.match(r'\$(.+)', m.group(3)) 
-        if m1: 
-            #변수명, byte 받기.
-            var = m1.group(1)
-            var, byte = set_var_and_byte(var)
-            if not chk_valid_variable_name(var): return #변수명 확인.
-
-            data = C.VARIABLES[var][:byte]
+        _, data, var, byte = case_set_STACK_1(r_value)
         
         # set new #ebp-num = 'data' {#length}
-        m1 = re.match(r'[\'\"](.*)[\'\"] *(\d*)', m.group(3)) 
-        if m1:
-            #데이터 입력받기.
-            data = m1.group(1)
-            
-            #byte받기.
-            byte = m1.group(2)
-            byte = int(byte) if byte != '' else len(data)
-            
-            data = data[:byte]
-            var = ''
+        _, data, var, byte = case_set_STACK_2(r_value)
+        
+        if not _ :
+            ErrMsg('set')
+            return
 
-        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
-        if idx != None:
-            C.STACK.insert(idx, {
-                'data' : data,
-                'assignedVar' : var,
-                'RDistance(BP)' : relativeAddr,
-                'DLength' : byte
-            })
-            reset_RDistance_BP()
-        else:
-            print("relative address is invalid.") # ISSUE #21
+        '''Adjust to STACK'''
+        adjust_set_STACK(True, data, var, relativeAddr, byte)
         return
 
     "set"
@@ -108,76 +82,51 @@ def _set_():
     # set $var1 = 'data' {#length}
     m = re.match(r'set +\$(.+)= *(.+)', C.CMD)
     if m:
-        var1 = m.group(1).rstrip()
-        if not chk_valid_variable_name(var1) : return
+        '''init'''
+        l_var, r_value = init_set_var(m)
+        if not chk_valid_variable_name(l_var) : return
+        if not chk_var_in_VARIABLES(True, l_var): return
         
+        '''Case'''
         # set $var1 = $var2 {#length}
-        m1 = re.match(r'\$(.+)', m.group(2))
-        if m1:
-            var2 = m1.group(1).rstrip()
-            var2, byte = set_var_and_byte(var2)
-            if not chk_valid_variable_name(var2) : return
-            data = C.VARIABLES[var2][:byte]
+        _, data, byte = case_set_var_1(r_value)
         
         # set $var1 = 'data' {#length}
-        m1 = re.match(r'[\'\"](.*)[\'\"] *(\d*)', m.group(2))
-        if m1:
-            data = m1.group(1)
-            byte = m1.group(2)
-            byte = int(byte) if byte != '' else len(data)
-            data = data[:byte]
+        _, data, byte = case_set_var_2(r_value)
         
-        if var1 not in C.VARIABLES:
-            print("This Variable name is not declared, please declare it first using set new")
+        if not _ :
+            ErrMsg('set')
             return
-        C.VARIABLES[var1] = data
+        
+        '''Adjust to C.VARIABLES'''
+        C.VARIABLES[l_var]['data'] = data
+        C.VARIABLES[l_var]['DLen'] = byte
+        if C.VARIABLES[l_var]['type'] == 'STACKLink':
+            idx = next( (index for (index, d) in enumerate(C.STACK) if d["assignedVar"] == l_var), None)
+            if idx != None :
+                C.STACK[idx]['DLength'] = byte
+                reset_RDistance_BP()
         return
     
     # set #ebp-num = $var1 {#length}
     # set #ebp-num = 'data' {#length}
     m = re.match(r'set +(.*)([-+]\d+) *= *(.+)', C.CMD) 
     if m:
-        #기준 정하기. esp? ebp?
-        base = m.group(1)
-        base = base if base != '' else 'ebp'
+        '''init'''
+        base, relativeAddr, r_value = init_set_STACK(m)
         
-        #상대주소 +num, -num
-        relativeAddr = int(m.group(2))
-        
+        '''Case'''
         # set #ebp-num = $var1 {#length}
-        m1 = re.match(r'\$(.+)', m.group(3)) 
-        if m1:
-            #변수명 받기.
-            var = m1.group(1)
-            var, byte = set_var_and_byte(var)
-            if not chk_valid_variable_name(var): return #변수명 확인.  
-            
-            data = C.VARIABLES[var][:byte]
+        _, data, var, byte = case_set_STACK_1(r_value)
         
         # set #ebp-num = 'data' {#length}
-        m1 = re.match('[\'\"](.*)[\'\"] *(\d*)', m.group(3))
-        if m1:
-            #데이터 입력받기.
-            data = m1.group(1)
+        _, data, var, byte = case_set_STACK_2(r_value)
         
-            #byte받기.    
-            byte = m1.group(2)
-            byte = int(byte) if byte != '' else len(data)
-            
-            data = data[:byte]
-            var = ''
+        if not _ :
+            ErrMsg('set')
+            return
         
-        
-        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == relativeAddr), None)
-        if idx != None:
-            C.STACK[idx] = {
-                'data' : data,
-                'assignedVar' : var,
-                'RDistance(BP)' : relativeAddr,
-                'DLength' : byte
-            }
-            reset_RDistance_BP()
-        else:
-            print("relative address is invalid.") # ISSUE #21
+        '''Adjust to C.STACK'''
+        adjust_set_STACK(False, data, var, relativeAddr, byte)
         return
     ErrMsg('set')
