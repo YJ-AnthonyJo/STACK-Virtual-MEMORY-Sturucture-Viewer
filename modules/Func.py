@@ -136,10 +136,10 @@ def case_set_var_1(r_value):
                 return [False] * 3
 
 def case_set_var_2(r_value):
-        m = re.match(r'[\'\"](.*)[\'\"] *(\d*)', r_value)
+        m = re.match(r'([\'\"])(.*)\1 *(\d*)', r_value)
         if m:
-                data = m.group(1)
-                byte = m.group(2)
+                data = m.group(2)
+                byte = m.group(3)
                 byte = int(byte) if byte != '' else len(data)
                 data = data[:byte]
                 return True, data, byte
@@ -160,13 +160,13 @@ def case_set_STACK_1(r_value):
                 return [False] * 4
 
 def case_set_STACK_2(r_value):
-        m = re.match('[\'\"](.*)[\'\"] *(\d*)', r_value)
+        m = re.match(r'([\'\"])(.*)\1 *(\d*)', r_value)
         if m:
                 #데이터 입력받기.
-                data = m.group(1)
+                data = m.group(2)
 
                 #byte받기.    
-                byte = m.group(2)
+                byte = m.group(3)
                 byte = int(byte) if byte != '' else len(data)
 
                 data = data[:byte]
