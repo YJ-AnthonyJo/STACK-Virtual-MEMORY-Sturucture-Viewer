@@ -16,11 +16,11 @@ def push():
     None
     ''' 
     # push {$var1} {#byte}
-    # push {$var1} {=} {'"문자열"'} {#byte}
-    # push {$var1} {=} {$var2} {#byte}
+    # push modify {$var1} {=} {'"문자열"'} {#byte}
+    # push modify {$var1} {=} {$var2} {#byte}
     # push new {$var1} {=} {'"문자열"'} {#byte}
     # push new {$var1} {=} {$var2} {#byte}
-    m = re.match(r'push +\$(.+)', C.CMD)
+    m = re.match(r'push +modify +\$(.+)', C.CMD)
     m1 = re.match(r'push +new +\$(.+)', C.CMD)
     if m or m1:
         # 변수명 check안해주어도 됨. (이미 var로 존재한다는 것은 통과했다는 것.)
@@ -30,8 +30,8 @@ def push():
             # push {$var} {#byte} :$var은 assigned된 상태여야한다.
             _, data_string, var, byte = push_var_only(var)
         else:
-            # push {$var1} {=} {'"문자열"'} {#byte}
-            # push {$var1} {=} {$var2} {#byte}
+            # push modify {$var1} {=} {'"문자열"'} {#byte}
+            # push modify {$var1} {=} {$var2} {#byte}
             # push new {$var1} {=} {'"문자열"'} {#byte}
             # push new {$var1} {=} {$var2} {#byte}
             new = True if m1 else False

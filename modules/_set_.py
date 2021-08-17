@@ -78,9 +78,9 @@ def _set_():
         return
 
     "set"
-    # set $var1 = $var2 {#length}
-    # set $var1 = 'data' {#length}
-    m = re.match(r'set +\$(.+)= *(.+)', C.CMD)
+    # set modify $var1 = $var2 {#length}
+    # set modify $var1 = 'data' {#length}
+    m = re.match(r'set +modify +\$(.+)= *(.+)', C.CMD)
     if m:
         '''init'''
         l_var, r_value = init_set_var(m)
@@ -88,10 +88,10 @@ def _set_():
         if not chk_var_in_VARIABLES(True, l_var): return
         
         '''Case'''
-        # set $var1 = $var2 {#length}
+        # set modify $var1 = $var2 {#length}
         _, data, byte = case_set_var_1(r_value)
         
-        # set $var1 = 'data' {#length}
+        # set modify $var1 = 'data' {#length}
         _, data, byte = case_set_var_2(r_value)
         
         if not _ :
@@ -103,17 +103,6 @@ def _set_():
         C.VARIABLES[l_var]['DLen'] = byte
         if C.VARIABLES[l_var]['type'] == 'STACKLink':
             modify_VARIABLE_chk_STACK(l_var, byte)
-            # 위 함수로 대체
-            # idx = list(filter(lambda x: C.STACK[x]['assignedVar'] == l_var, range(len(C.STACK))))
-            # for i in idx:
-            #     C.STACK[i]['DLength'] = byte
-            # reset_RDistance_BP()
-            
-            # 위 문장으로 대체
-            # idx = next( (index for (index, d) in enumerate(C.STACK) if d["assignedVar"] == l_var), None)
-            # if idx != None :
-            #     C.STACK[idx]['DLength'] = byte
-            #     reset_RDistance_BP()
         return
     
     # set #ebp-num = $var1 {#length}
