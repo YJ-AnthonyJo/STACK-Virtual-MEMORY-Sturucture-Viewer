@@ -84,8 +84,111 @@ def ErrMsg(func):
                 If Something Wrong with syntax, etc.. Please add Issue at
                 https://github.com/YJ-AnthonyJo/STACK-Virtual-MEMORY-Sturucture-Viewer/issues/"""))
 
-def chk_var_in_VARIABLES_(var):
+def chk_var_in_VARIABLES(want, var): #want : 바람(원하는 것)
         if var in C.VARIABLES:
-            print("This Variable name is already exist, please use other.")
-            return
-chk_var_in_VARIABLES = lambda var : True if var in C.VARIABLES else False
+                if want == False: #있지만 하지만 없는 것을 바람
+                        print("This Variable name is already exist, please use other.")
+                        return False
+                else: #있고, 있기를 바람
+                        return True
+        else:
+                if want == True: #없지만 있는 것을 바람
+                        print(f"{var} is not assigned. please check variables using print all")
+                        return False
+                else: #없고, 없기를 바람
+                        return True
+                
+# chk_var_in_VARIABLES = lambda var : True if var in C.VARIABLES else False
+
+def LWS(byte, var):
+        if byte >= C.VARIABLES[var]['DLen']:
+                # LWS 처리.
+                data = ''
+                var = var
+                C.VARIABLES[var]['type'] = 'STACKLink'
+                return data, var
+        else:
+                data = C.VARIABLES[var]['data'][:byte]
+                var = ''
+                return data, var
+
+def init_set_STACK(m):
+        #기준 정하기. esp? ebp?
+        base = m.group(1)
+        base = base if base != '' else 'ebp'
+        #상대주소 +num, -num
+        relativeAddr = int(m.group(2)) 
+        r_value = m.group(3)
+        return base, relativeAddr, r_value
+
+def init_set_var(m):
+        l_var = m.group(1).rstrip()
+        r_value = m.group(2)
+        return l_var, r_value
+
+def case_set_var_1(r_value):
+        m = re.match(r'\$(.+)', r_value)
+        if m:
+                r_var = m.group(1).rstrip()
+                r_var, byte = set_var_and_byte(r_var)
+                if not chk_valid_variable_name(r_var) : return [False] * 3
+                data = C.VARIABLES[r_var]['data'][:byte]
+                return True, data, byte
+        else:
+                return [False] * 3
+
+def case_set_var_2(r_value):
+        m = re.match(r'[\'\"](.*)[\'\"] *(\d*)', r_value)
+        if m:
+                data = m.group(1)
+                byte = m.group(2)
+                byte = int(byte) if byte != '' else len(data)
+                data = data[:byte]
+                return True, data, byte
+        else:
+                return [False] * 3
+
+def case_set_STACK_1(r_value):
+        m = re.match(r'\$(.+)', r_value) 
+        if m:
+            #변수명 받기.
+            var = m.group(1)
+            var, byte = set_var_and_byte(var)
+            if not chk_var_in_VARIABLES(True, var): return [False] * 4
+            
+            data, var = LWS(byte, var)
+            return True, data, var, byte
+        else:
+                return [False] * 4
+
+def case_set_STACK_2(r_value):
+        m = re.match('[\'\"](.*)[\'\"] *(\d*)', r_value)
+        if m:
+                #데이터 입력받기.
+                data = m.group(1)
+
+                #byte받기.    
+                byte = m.group(2)
+                byte = int(byte) if byte != '' else len(data)
+
+                data = data[:byte]
+                var = ''
+                return True, data, var, byte
+        else:
+                return [False] * 4
+
+def adjust_set_STACK(new, *args):
+        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == args[-2]), None)
+        if idx != None:
+                _exec = inspect.cleandoc("""
+                C.STACK{0}{{
+                'data' : {2!r},
+                'assignedVar' : {3!r},
+                'RDistance(BP)' : {4!r},
+                'DLength' : {5!r}
+                }}{1}
+                reset_RDistance_BP()
+                """.format('.insert(idx, ' if new == True else '[idx] = ', ')' if new == True else '', *args))
+                exec(_exec)
+        else:
+                print("relative address is invalid.") # ISSUE #21

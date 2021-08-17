@@ -43,6 +43,11 @@ VARIABLES = {
 }
 ```
 
+- VARIABLES의 type은 치역의 개념이다.
+- stack의 assignedvar가 정의역개념이고.
+- assignedvar -> type.
+- 따라서 복수개의 STACK 데이터가 하나의 variable에 대입될 수 있다.
+
 # Default Var
 - int_max, int_min 등.. boundary값.
 
