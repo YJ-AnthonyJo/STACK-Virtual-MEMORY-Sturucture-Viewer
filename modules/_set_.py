@@ -53,7 +53,11 @@ def _set_():
         if var1 in C.VARIABLES: #기존에 존재시.
             print("This Variable name is already exist, please use other.")
             return
-        C.VARIABLES[var1] = data
+        C.VARIABLES[var1] = {
+            'type' : 'var',
+            'data' : data,
+            'DLen' : byte
+        }
         return
     
     # set new #ebp-num = $var2 {#length}
@@ -117,7 +121,7 @@ def _set_():
             var2 = m1.group(1).rstrip()
             var2, byte = set_var_and_byte(var2)
             if not chk_valid_variable_name(var2) : return
-            data = C.VARIABLES[var2][:byte]
+            data = C.VARIABLES[var2]['data'][:byte]
         
         # set $var1 = 'data' {#length}
         m1 = re.match(r'[\'\"](.*)[\'\"] *(\d*)', m.group(2))
@@ -131,6 +135,8 @@ def _set_():
             print("This Variable name is not declared, please declare it first using set new")
             return
         C.VARIABLES[var1] = data
+        C.VARIABLES[var1]['data'] = data
+        C.VARIABLES[var1]['DLen'] = byte
         return
     
     # set #ebp-num = $var1 {#length}
