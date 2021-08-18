@@ -12,7 +12,7 @@ def pop():
         data = C.STACK.pop()
         chk_sfp(data['data'])
     else: # pop 결과를 변수에 저장 -> link with stack 아님.
-        m = re.match(r'pop +\$(.+)', C.CMD)
+        m = re.match(r'pop +modify +\$(.+)', C.CMD)
         m1 = re.match(r'pop +new +\$(.+)', C.CMD)
         if m or m1:
             var = m.group(1) if m else m1.group(1)
@@ -23,7 +23,7 @@ def pop():
             data = C.STACK.pop()
             C.VARIABLES[var] = {
                 'type' : 'var',
-                'data' : data['data'],
+                'data' : C.VARIABLES[data['assignedVar']] if data['assignedVar'] != '' else data['data'],
                 'DLen' : len(data['data'])
             }
             print(var, '=', C.VARIABLES[var]['data'])
