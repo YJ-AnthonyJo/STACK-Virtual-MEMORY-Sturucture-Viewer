@@ -1,4 +1,4 @@
-import re
+import re, os
 import config as C
 from Func import *
 def init():
@@ -46,12 +46,20 @@ def print_stack(from_ = None, to = None):
     if len(C.STACK) == 0:
         print("STACK is Empty.")
         return
+    
+    try:
+        max_length = os.get_terminal_size()[0] #현재 terminal에서 최대로 출력가능한 값.
+    except:
+        print("Can't get current window size. Mabye Running on IDLE.\nThat's OK. Just little inconvenience.😅")
+        max_length = None
+    
+    default = 4 + 10 # | hello | <= EBP - 5에서 data, num부분 뺀 default 출력부. # 4는 |까지 부분. 10은 이후.
+    
     PrintData = lambda data: (data['data'] if data['assignedVar'] == '' else '$' + data['assignedVar']) # issue 10, variable_name이 있으면 variable_name, 없으면 data
     
     _ = get_max(
         lambda d : len(PrintData(d))
-    )#한 줄에 출력해야할 가장 긴 것의 길이 가져옴.
-    maxLen = _ if _ < 20 else 20 #한줄에 출력할 최대 글자.
+    )#한 줄에 출력해야할 가장 긴 data의 길이.
     
     maxNum = get_max(
         lambda d : len(
@@ -59,19 +67,23 @@ def print_stack(from_ = None, to = None):
             )
     ) # EBP뒤에 나올 최대 숫자 -> 문자열화 길이.
     
-    numOfStars = maxLen//2 + maxNum//2 + 5
+    maxLen = default + _ + maxNum # 왜 가운데 이모티콘 같지 ㅋㅋㅋㅋㅋ (+_+)!!!
+    
+    if max_length != None:
+        maxLen = maxLen if maxLen < max_length else max_length #한줄에 출력할 최대 글자.
+    else: # 위 except에서 말한 Just Little inconvenience에 해당하는 부분..
+        maxLen = maxLen
+    
+    maxDataLen = maxLen - default - maxNum
+    maxDataLen = _ if _ < maxDataLen else maxDataLen # data만 따졌을 때 출력할 수 있는 최대.
+    
+    # numOfStars = maxLen//2 + maxNum//2 + 5
+    # numOfStars = maxDataLen//2 + maxNum//2 + 5
+    numOfStars = (maxLen-7) // 2 + (maxLen-7) % 2
     print(f"{'*' *  numOfStars} STACK {'*' * numOfStars}")
-    print('-' * (maxLen + 4))
+    print('-' * (maxDataLen + 4)) # |부분까지.
     for data in C.STACK[from_ : to]:
-        LineNum = data['DLength'] // 4 + int(data['DLength'] % 4 != 0) #현 데이터당 출력 줄수 지정.
-        
-        for _ in range(1, LineNum): print("|", ' ' * maxLen, '|') # 마지막 줄 전까지 공백 출력.
-        PData = PrintData(data)
-        print('|', PData, ' '*(maxLen-len(PData)), end='') # 마지막 줄에 데이터 출력.
-        
-        sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
-        if data['RDistance(BP)'] == 0: print(f'| <= EBP')
-        else: print(f'| <= EBP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
-        
-        print('-' * (maxLen + 4))
+        # print_stack_v1(data,maxDataLen, PrintData) #.....으로 치환.
+        print_stack_v2(data, maxDataLen, PrintData) # 복수 줄에 출력.
+
     print(f"{'*' * numOfStars } STACK {'*' * numOfStars}")
