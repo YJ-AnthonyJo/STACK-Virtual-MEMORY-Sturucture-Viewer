@@ -9,9 +9,9 @@ def init():
     '''
     if C.CMD == 'print': #STACK출력
         print_stack()
-    elif C.CMD == 'print all': #모든 변수 출력
+    elif re.match('print +all$', C.CMD): #모든 변수 출력
         for name, data in C.VARIABLES.items():
-            print(name, '=', data)
+            print(f'${name}', '=', data)
 
     else:
         p = re.compile('print +(\d*):(\d*)$')
@@ -37,9 +37,24 @@ def init():
             if bool(m):
                 vari = m.group(1).strip()
                 if chk_valid_variable_name(vari):
-                    print(vari, '=' , C.VARIABLES[vari])
+                    print(f"${vari}", '=' , C.VARIABLES[vari])
             else:
-                ErrMsg('print')
+                #env 출력.
+                m = re.match('print +env +\$([^ ]+)', C.CMD)
+                m1 = re.match('^print +env +all$', C.CMD)
+                if m or m1:
+                    if m1 :
+                        print("*****ENVIRONMENTAL VARIABLES*****")
+                        for name, value in C.EnvVar.items():
+                            print(f'${name}', '=', value)
+                    elif m:
+                        env = m.group(1)
+                        if env in C.EnvVar:
+                            print(C.EnvVar[env])
+                        else:
+                            print("No such environmental variable. please 'print env all' to check all env")
+                else:
+                    ErrMsg('print')
 
 
 def print_stack(from_ = None, to = None):
@@ -77,13 +92,12 @@ def print_stack(from_ = None, to = None):
     maxDataLen = maxLen - default - maxNum
     maxDataLen = _ if _ < maxDataLen else maxDataLen # data만 따졌을 때 출력할 수 있는 최대.
     
-    # numOfStars = maxLen//2 + maxNum//2 + 5
-    # numOfStars = maxDataLen//2 + maxNum//2 + 5
     numOfStars = (maxLen-7) // 2 + (maxLen-7) % 2
     print(f"{'*' *  numOfStars} STACK {'*' * numOfStars}")
     print('-' * (maxDataLen + 4)) # |부분까지.
     for data in C.STACK[from_ : to]:
-        # print_stack_v1(data,maxDataLen, PrintData) #.....으로 치환.
-        print_stack_v2(data, maxDataLen, PrintData) # 복수 줄에 출력.
+        if C.EnvVar['MultiLineP'] == 'Yes':
+            print_stack_v2(data, maxDataLen, PrintData) # 복수 줄에 출력.
+        else: print_stack_v1(data,maxDataLen, PrintData) #.....으로 치환.
 
     print(f"{'*' * numOfStars } STACK {'*' * numOfStars}")

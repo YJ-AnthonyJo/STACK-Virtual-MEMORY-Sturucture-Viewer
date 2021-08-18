@@ -55,3 +55,8 @@ VARIABLES = {
 
 commands = ["print", "push", "pop", "set", "clear", 'quit']
 CMD = ''
+
+EnvVar = {
+    "MultiLineP" : "Yes", # 문자열. 'Yes' or 'No'
+    "regType" : 32 # 정수. 32 or 64
+}

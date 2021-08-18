@@ -214,7 +214,7 @@ def modify_VARIABLE_chk_STACK(var, byte):
 
 def print_stack_v1(data, maxDataLen, PrintData):
         '''.....으로 대체'''
-        LineNum = data['DLength'] // 4 + int(data['DLength'] % 4 != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
+        LineNum = data['DLength'] // (C.EnvVar['regType'] // 8) + int(data['DLength'] % (C.EnvVar['regType'] // 8) != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
         
         for _ in range(1, LineNum): print("|", ' ' * maxDataLen, '|') # 마지막 줄 전까지 공백 출력.
         PData = PrintData(data)
@@ -228,13 +228,13 @@ def print_stack_v1(data, maxDataLen, PrintData):
         
         sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
         if data['RDistance(BP)'] == 0: print(f'| <= EBP')
-        else: print(f'| <= EBP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
         
         print('-' * (maxDataLen + 4))
 
 def print_stack_v2(data, maxDataLen, PrintData):
         '''복수줄에 표시.(4바이트 넘을 시.)'''
-        LineNum = data['DLength'] // 4 + int(data['DLength'] % 4 != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
+        LineNum = data['DLength'] // (C.EnvVar['regType'] // 8) + int(data['DLength'] % (C.EnvVar['regType'] // 8) != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
         
         PData = [PrintData(data)]
         if len(PData[0]) > maxDataLen and LineNum >= 2:
@@ -252,7 +252,7 @@ def print_stack_v2(data, maxDataLen, PrintData):
         print('|', PData[-1], ' '*(maxDataLen-len(PData[-1])), end='') # 마지막 줄, 데이터 출력.
         
         sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
-        if data['RDistance(BP)'] == 0: print(f'| <= EBP')
-        else: print(f'| <= EBP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        if data['RDistance(BP)'] == 0: print('| <= {}BP'.format('E' if C.EnvVar['regType'] == 32 else 'R'))
+        else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
         
         print('-' * (maxDataLen + 4))

@@ -1,6 +1,6 @@
 import config as C
 from Func import *
-import re
+import re, json
 
 def _set_():
     r'''
@@ -126,4 +126,33 @@ def _set_():
         '''Adjust to C.STACK'''
         adjust_set_STACK(False, data, var, relativeAddr, byte)
         return
+    
+    m = re.match(r'set +env +\$([^ ]+) *= *([^ ]+)$', C.CMD)
+    if m:
+        env, data = m.group(1), m.group(2)
+        m = re.match(r'([\'\"])([^ ]+)\1', data)
+        if m: data = m.group(2)
+        flag = False
+        if env.lower() == 'multilinep':
+            if data.lower() in ['yes', 'no']:
+                C.EnvVar['MultiLineP'] = 'Yes' if data.lower() == 'yes' else 'No'
+                flag = True
+            else:
+                print("MultiLineP has two options. [yes] or [no]")
+        elif env.lower() =='regtype':
+            if data.lower() in ['32', '64']:
+                C.EnvVar['regType'] = 32 if data.lower() == '32' else 64
+                flag = True
+            else:
+                print("regType has two options. [32] or [64]")
+        else:
+            print("no such Environmental Variables.")
+        
+        if flag:
+            f = open('EnvVars.json', 'w')
+            json.dump(C.EnvVar, f, indent=2)
+            f.close()
+            pass
+        return        
+        
     ErrMsg('set')
