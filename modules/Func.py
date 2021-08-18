@@ -190,3 +190,16 @@ def adjust_set_STACK(new, *args):
                 exec(_exec)
         else:
                 print("relative address is invalid.") # ISSUE #21
+
+
+def modify_VARIABLE_chk_STACK(var, byte):
+        # 기존에 존재하는 변수가 바뀌었는데 그 변수의 type이 LWS였을 때,
+        # 해당 변수을 사용하는 STACK을 수정해준다.
+        idx = list(
+                filter(
+                        lambda x: C.STACK[x]['assignedVar'] == var, range(len(C.STACK))
+                        )
+                )
+        for i in idx:
+                C.STACK[i]['DLength'] = byte
+        if idx != [] : reset_RDistance_BP()

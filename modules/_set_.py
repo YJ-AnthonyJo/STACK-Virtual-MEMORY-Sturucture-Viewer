@@ -102,10 +102,18 @@ def _set_():
         C.VARIABLES[l_var]['data'] = data
         C.VARIABLES[l_var]['DLen'] = byte
         if C.VARIABLES[l_var]['type'] == 'STACKLink':
-            idx = next( (index for (index, d) in enumerate(C.STACK) if d["assignedVar"] == l_var), None)
-            if idx != None :
-                C.STACK[idx]['DLength'] = byte
-                reset_RDistance_BP()
+            modify_VARIABLE_chk_STACK(l_var, byte)
+            # 위 함수로 대체
+            # idx = list(filter(lambda x: C.STACK[x]['assignedVar'] == l_var, range(len(C.STACK))))
+            # for i in idx:
+            #     C.STACK[i]['DLength'] = byte
+            # reset_RDistance_BP()
+            
+            # 위 문장으로 대체
+            # idx = next( (index for (index, d) in enumerate(C.STACK) if d["assignedVar"] == l_var), None)
+            # if idx != None :
+            #     C.STACK[idx]['DLength'] = byte
+            #     reset_RDistance_BP()
         return
     
     # set #ebp-num = $var1 {#length}

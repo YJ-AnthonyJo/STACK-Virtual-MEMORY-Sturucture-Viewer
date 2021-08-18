@@ -18,16 +18,24 @@ def push():
     # push {$var1} {#byte}
     # push {$var1} {=} {'"문자열"'} {#byte}
     # push {$var1} {=} {$var2} {#byte}
+    # push new {$var1} {=} {'"문자열"'} {#byte}
+    # push new {$var1} {=} {$var2} {#byte}
     m = re.match(r'push +\$(.+)', C.CMD)
-    if m:
+    m1 = re.match(r'push +new +\$(.+)', C.CMD)
+    if m or m1:
         # 변수명 check안해주어도 됨. (이미 var로 존재한다는 것은 통과했다는 것.)
-        var = m.group(1) #$var = {'"data"'} {#length}일 때, $이후 부분을 가져감. 후처리.
-        if '=' not in var : 
-            # push {$var} :$var은 assigned된 상태여야한다.
+        var = m.group(1) if m else m1.group(1)
+        #$var = {'"data"'} {#length}일 때, $이후 부분을 가져감. 후처리.
+        if m and '=' not in var: 
+            # push {$var} {#byte} :$var은 assigned된 상태여야한다.
             _, data_string, var, byte = push_var_only(var)
         else:
             # push {$var1} {=} {'"문자열"'} {#byte}
-            _, data_string, var, byte = push_var_new_assignment(var)
+            # push {$var1} {=} {$var2} {#byte}
+            # push new {$var1} {=} {'"문자열"'} {#byte}
+            # push new {$var1} {=} {$var2} {#byte}
+            new = True if m1 else False
+            _, data_string, var, byte = push_var_new_assignment(var, new)
         
         if not _: 
             ErrMsg('push')
@@ -52,24 +60,28 @@ def push_var_only(var):
     m = re.match('(.+) +(\d+)', var)
     if m: # push $var {length}
         var = m.group(1)
+        if not chk_var_in_VARIABLES(True, var) : return [False] * 4
         byte = int(m.group(2))
     else: # push $var
         var = var.strip()
+        if not chk_var_in_VARIABLES(True, var) : return [False] * 4
         byte = C.VARIABLES[var]['DLen']
     
-    if not chk_var_in_VARIABLES(True, var) : return [False] * 4
     
     data_string, var = LWS(byte, var)
     
     return True, data_string, var, byte
 
-def push_var_new_assignment(var):
+def push_var_new_assignment(var, new):
     # var 새로 assignment.
     m = re.match(r'(.+)= *[\'\"](.*)[\'\"] *(\d*)', var) 
     if m: 
+        # push {$var1} {=} {'"문자열"'} {#byte}
+        # push new {$var1} {=} {'"문자열"'} {#byte}
         var = m.group(1).strip()
-        if not chk_valid_variable_name(var):
-            return [False] * 4
+        
+        chk = chk_var_in_VARIABLES(False, var) and chk_valid_variable_name(var) if new else chk_var_in_VARIABLES(True, var)
+        if not chk: return [False] * 4
         
         data_string = m.group(2)
         
@@ -78,6 +90,9 @@ def push_var_new_assignment(var):
         
         data_string = data_string[:byte]
         
+        if not new: modify_VARIABLE_chk_STACK(var, byte)
+
+
         C.VARIABLES[var] = {
             'type' : 'STACKLink',
             'data' : data_string,
@@ -85,12 +100,16 @@ def push_var_new_assignment(var):
         }
         data_string = '' # LWS : C.VARIABLES의 data로 접근할 것임.(동기화 위해)
         return True, data_string, var, byte
-    else : #var : 't2 = $t1'
+    else :
+        # push {$var1} {=} {$var2} {#byte}
+        # push new {$var1} {=} {$var2} {#byte}
         m = re.match(r'(.+)= *\$(.+)', var) 
         if m:
             l_var = m.group(1).strip()
-            if not chk_valid_variable_name(l_var):
-                return [False] * 4
+            
+            chk = chk_var_in_VARIABLES(False, l_var) and chk_valid_variable_name(l_var) if new else chk_var_in_VARIABLES(True, l_var)
+            if not chk: return [False] * 4
+            
             r_var = m.group(2).strip()
             
             m = re.match(r'(.+) +(\d+)', r_var)
@@ -102,6 +121,8 @@ def push_var_new_assignment(var):
                 r_var = r_var
                 if not chk_var_in_VARIABLES(True, r_var): return [False] * 4
                 byte = C.VARIABLES[r_var]['DLen']
+            
+            if not new: modify_VARIABLE_chk_STACK(l_var, byte)
             
             C.VARIABLES[l_var] = {
                 'type' : 'STACKLink',
