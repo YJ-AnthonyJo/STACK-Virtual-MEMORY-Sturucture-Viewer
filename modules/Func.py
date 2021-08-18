@@ -71,13 +71,19 @@ def get_max(lamb):
         return M
 
 def set_var_and_byte(var):
-        m = re.match(r'(.+) +(\d+)', var)
+        m = re.match(r'(.+) +(\d+)$', var)
         if m:
             var = m.group(1)
             byte = int(m.group(2))
+            return True, var, byte
         else:
-            byte = C.VARIABLES[var]['DLen']
-        return var, byte
+                m = re.match(r'([^ ]+)$', var)
+                if m:
+                        if not chk_var_in_VARIABLES(True, var) : return [False] * 2
+                        byte = C.VARIABLES[var]['DLen']
+                        return True, var, byte
+        return [False] * 3
+        
 
 def ErrMsg(func):
         print(inspect.cleandoc(f"""Syntax Error. Please Check Manual Using help({func})
@@ -128,18 +134,18 @@ def case_set_var_1(r_value):
         m = re.match(r'\$(.+)', r_value)
         if m:
                 r_var = m.group(1).rstrip()
-                r_var, byte = set_var_and_byte(r_var)
-                if not chk_valid_variable_name(r_var) : return [False] * 3
+                _, r_var, byte = set_var_and_byte(r_var)
+                if not _ or not chk_var_in_VARIABLES(True, r_var) : return [False] * 3
                 data = C.VARIABLES[r_var]['data'][:byte]
                 return True, data, byte
         else:
                 return [False] * 3
 
 def case_set_var_2(r_value):
-        m = re.match(r'[\'\"](.*)[\'\"] *(\d*)', r_value)
+        m = re.match(r'([\'\"])(.*)\1 *(\d*)$', r_value)
         if m:
-                data = m.group(1)
-                byte = m.group(2)
+                data = m.group(2)
+                byte = m.group(3)
                 byte = int(byte) if byte != '' else len(data)
                 data = data[:byte]
                 return True, data, byte
@@ -150,9 +156,9 @@ def case_set_STACK_1(r_value):
         m = re.match(r'\$(.+)', r_value) 
         if m:
             #변수명 받기.
-            var = m.group(1)
-            var, byte = set_var_and_byte(var)
-            if not chk_var_in_VARIABLES(True, var): return [False] * 4
+            var = m.group(1).rstrip()
+            _, var, byte = set_var_and_byte(var)
+            if not _ or not chk_var_in_VARIABLES(True, var): return [False] * 4
             
             data, var = LWS(byte, var)
             return True, data, var, byte
@@ -160,13 +166,13 @@ def case_set_STACK_1(r_value):
                 return [False] * 4
 
 def case_set_STACK_2(r_value):
-        m = re.match('[\'\"](.*)[\'\"] *(\d*)', r_value)
+        m = re.match(r'([\'\"])(.*)\1 *(\d*)$', r_value)
         if m:
                 #데이터 입력받기.
-                data = m.group(1)
+                data = m.group(2)
 
                 #byte받기.    
-                byte = m.group(2)
+                byte = m.group(3)
                 byte = int(byte) if byte != '' else len(data)
 
                 data = data[:byte]

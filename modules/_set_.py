@@ -41,7 +41,7 @@ def _set_():
         _, data, byte = case_set_var_1(r_value)
         
         # set new $var1 = 'data' {#length}
-        _, data, byte = case_set_var_2(r_value)
+        if not _: _, data, byte = case_set_var_2(r_value)
         
         if not _ :
             ErrMsg('set')
@@ -67,7 +67,7 @@ def _set_():
         _, data, var, byte = case_set_STACK_1(r_value)
         
         # set new #ebp-num = 'data' {#length}
-        _, data, var, byte = case_set_STACK_2(r_value)
+        if not _: _, data, var, byte = case_set_STACK_2(r_value)
         
         if not _ :
             ErrMsg('set')
@@ -92,7 +92,7 @@ def _set_():
         _, data, byte = case_set_var_1(r_value)
         
         # set modify $var1 = 'data' {#length}
-        _, data, byte = case_set_var_2(r_value)
+        if not _: _, data, byte = case_set_var_2(r_value)
         
         if not _ :
             ErrMsg('set')
@@ -117,7 +117,7 @@ def _set_():
         _, data, var, byte = case_set_STACK_1(r_value)
         
         # set #ebp-num = 'data' {#length}
-        _, data, var, byte = case_set_STACK_2(r_value)
+        if not _: _, data, var, byte = case_set_STACK_2(r_value)
         
         if not _ :
             ErrMsg('set')
