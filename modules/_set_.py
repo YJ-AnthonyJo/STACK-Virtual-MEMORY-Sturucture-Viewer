@@ -133,7 +133,7 @@ def _set_():
         m1 = re.match(r'[\'\"][^ ]+[\'\"]', data)
         m = re.match(r'([\'\"])([^ ]+)\1', data)
         if m1 and m: data = m.group(2)
-        elif m1 != None and m == None : return ErrMsg('set')
+        elif m1 == None or m1 != None and m == None : return ErrMsg('set')
         flag = False
         if env.lower() == 'multilinep':
             if data.lower() in ['yes', 'no']:
