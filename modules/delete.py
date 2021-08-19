@@ -20,21 +20,17 @@ def init():
             Rlength = int(m_s.group(2).replace(' ', ''))
             if base.lower() in ['esp', 'rsp']:
                 idx = next((i for i, data in enumerate([sum([d["DLength"] for d in C.STACK[idx + 1:]]) for idx in range(len(C.STACK))]) if data == Rlength), None)
-                if idx != None:
-                    if input(f'Really Delete {"E" if C.EnvVar["regType"] == 32 else "R"}SP+{Rlength} which is \'{C.STACK[idx]["data"]}\'? ').lower().startswith('y'):
-                        del C.STACK[idx]
-                        reset_RDistance_BP()
-                        print(f'Deleted {"E" if C.EnvVar["regType"] == 32 else "R"}SP+{Rlength} which is \'{C.STACK[idx]["data"]}\'.')
-                    
-                else:
-                    print("Relative address is invalid.")
+                quest = f'{"E" if C.EnvVar["regType"] == 32 else "R"}SP+{Rlength} which is \'{C.STACK[idx]["data"]}\''
 
             elif base.lower() in ['ebp', 'rbp']:
                 idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == Rlength), None)
-                if idx != None:
-                    if input(f'Really Delete {"E" if C.EnvVar["regType"] == 32 else "R"}BP-{Rlength} which is \'{C.STACK[idx]["data"]}\'? ').lower().startswith('y'):
-                        del C.STACK[idx]
-                        reset_RDistance_BP()
-                        print(f'Deleted {"E" if C.EnvVar["regType"] == 32 else "R"}BP-{Rlength} which is \'{C.STACK[idx]["data"]}\'.')
-                else:
-                    print("Relative address is invalid.")
+                quest = f'{"E" if C.EnvVar["regType"] == 32 else "R"}BP{format(Rlength,"+d")} which is \'{C.STACK[idx]["data"]}\''
+            
+            if idx != None:
+                if input(f'Really Delete {quest}? ').lower().startswith('y'):
+                    del C.STACK[idx]
+                    reset_RDistance_BP()
+                    print(f'Deleted {quest}')
+                    
+            else:
+                print("Relative address is invalid.")
