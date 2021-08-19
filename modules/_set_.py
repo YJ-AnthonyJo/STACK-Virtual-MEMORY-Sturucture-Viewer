@@ -57,7 +57,7 @@ def _set_():
     
     # set new #ebp-num = $var2 {#length}
     # set new #ebp-num = 'data' {#length}
-    m = re.match(r'set +new +(.*)([-+]\d+) *= *(.+)', C.CMD)
+    m = re.match(r'set +new +(.*)([-+] *\d+) *= *(.+)', C.CMD)
     if m:
         '''init'''
         base, relativeAddr, r_value = init_set_STACK(m)
@@ -74,7 +74,7 @@ def _set_():
             return
 
         '''Adjust to STACK'''
-        adjust_set_STACK(True, data, var, relativeAddr, byte)
+        adjust_set_STACK(True, base, data, var, relativeAddr, byte)
         return
 
     "set"
@@ -107,7 +107,7 @@ def _set_():
     
     # set #ebp-num = $var1 {#length}
     # set #ebp-num = 'data' {#length}
-    m = re.match(r'set +(.*)([-+]\d+) *= *(.+)', C.CMD) 
+    m = re.match(r'set +(.*)([-+] *\d+) *= *(.+)', C.CMD) 
     if m:
         '''init'''
         base, relativeAddr, r_value = init_set_STACK(m)
@@ -124,7 +124,7 @@ def _set_():
             return
         
         '''Adjust to C.STACK'''
-        adjust_set_STACK(False, data, var, relativeAddr, byte)
+        adjust_set_STACK(False, base, data, var, relativeAddr, byte)
         return
     
     m = re.match(r'set +env +\$([^ ]+) *= *([^ ]+)$', C.CMD)

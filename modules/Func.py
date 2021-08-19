@@ -120,9 +120,9 @@ def LWS(byte, var):
 def init_set_STACK(m):
         #기준 정하기. esp? ebp?
         base = m.group(1)
-        base = base if base != '' else 'ebp'
+        base = base.rstrip() if base != '' else 'ebp'
         #상대주소 +num, -num
-        relativeAddr = int(m.group(2)) 
+        relativeAddr = int(m.group(2).replace(' ', '')) 
         r_value = m.group(3)
         return base, relativeAddr, r_value
 
@@ -182,8 +182,11 @@ def case_set_STACK_2(r_value):
         else:
                 return [False] * 4
 
-def adjust_set_STACK(new, *args):
-        idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == args[-2]), None)
+def adjust_set_STACK(new, base, *args):
+        if base.lower() in ['esp', 'rsp']:
+                idx = next((i for i, data in enumerate([sum([d["DLength"] for d in C.STACK[idx + 1:]]) for idx in range(len(C.STACK))]) if data == args[-2]), None)
+        elif base.lower() in ['ebp', 'rbp']:
+                idx = next( (index for (index, d) in enumerate(C.STACK) if d["RDistance(BP)"] == args[-2]), None)
         if idx != None:
                 _exec = inspect.cleandoc("""
                 C.STACK{0}{{

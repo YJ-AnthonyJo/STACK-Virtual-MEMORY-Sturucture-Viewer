@@ -53,7 +53,7 @@ VARIABLES = {
 
 """
 
-commands = ["print", "push", "pop", "set", "clear", 'quit']
+commands = ["print", "push", "pop", "set", "clear", 'quit', 'delete']
 CMD = ''
 
 EnvVar = {
