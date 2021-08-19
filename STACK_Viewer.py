@@ -10,7 +10,7 @@ import _set_, push, _print_, pop
 
 if __name__ == "__main__":
     try:
-        f = open('EnvVars.json')
+        f = open('./modules/EnvVars.json')
         s = f.read()
         f.close()
         

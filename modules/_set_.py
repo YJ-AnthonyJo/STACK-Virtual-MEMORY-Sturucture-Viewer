@@ -130,8 +130,10 @@ def _set_():
     m = re.match(r'set +env +\$([^ ]+) *= *([^ ]+)$', C.CMD)
     if m:
         env, data = m.group(1), m.group(2)
+        m1 = re.match(r'[\'\"][^ ]+[\'\"]', data)
         m = re.match(r'([\'\"])([^ ]+)\1', data)
-        if m: data = m.group(2)
+        if m1 and m: data = m.group(2)
+        elif m1 != None and m == None : return ErrMsg('set')
         flag = False
         if env.lower() == 'multilinep':
             if data.lower() in ['yes', 'no']:
@@ -145,11 +147,17 @@ def _set_():
                 flag = True
             else:
                 print("regType has two options. [32] or [64]")
+        elif env.lower() == 'base':
+            if data.lower() in['sp', 'bp']:
+                C.EnvVar['Base'] = 'SP' if data.lower() == 'sp' else 'BP'
+                flag = True
+            else:
+                print("Base has two options. [SP] or [BP]")
         else:
             print("no such Environmental Variables.")
         
         if flag:
-            f = open('EnvVars.json', 'w')
+            f = open('./modules/EnvVars.json', 'w')
             json.dump(C.EnvVar, f, indent=2)
             f.close()
             pass
