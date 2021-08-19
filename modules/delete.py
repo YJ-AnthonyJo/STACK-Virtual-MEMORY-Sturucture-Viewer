@@ -1,4 +1,3 @@
-from modules.config import STACK
 from Func import *
 import config as C
 import re
