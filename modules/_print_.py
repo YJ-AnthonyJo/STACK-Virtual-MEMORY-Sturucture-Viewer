@@ -95,9 +95,9 @@ def print_stack(from_ = None, to = None):
     numOfStars = (maxLen-7) // 2 + (maxLen-7) % 2
     print(f"{'*' *  numOfStars} STACK {'*' * numOfStars}")
     print('-' * (maxDataLen + 4)) # |부분까지.
-    for data in C.STACK[from_ : to]:
+    for idx, data in enumerate(C.STACK[from_ : to]):
         if C.EnvVar['MultiLineP'] == 'Yes':
-            print_stack_v2(data, maxDataLen, PrintData) # 복수 줄에 출력.
-        else: print_stack_v1(data,maxDataLen, PrintData) #.....으로 치환.
+            print_stack_v2(data, maxDataLen, PrintData, idx) # 복수 줄에 출력.
+        else: print_stack_v1(data,maxDataLen, PrintData, idx) #.....으로 치환.
 
     print(f"{'*' * numOfStars } STACK {'*' * numOfStars}")

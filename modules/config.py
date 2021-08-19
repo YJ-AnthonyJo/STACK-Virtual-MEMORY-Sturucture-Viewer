@@ -58,5 +58,6 @@ CMD = ''
 
 EnvVar = {
     "MultiLineP" : "Yes", # 문자열. 'Yes' or 'No'
-    "regType" : 32 # 정수. 32 or 64
+    "regType" : 32, # 정수. 32 or 64
+    "Base" : "BP"
 }

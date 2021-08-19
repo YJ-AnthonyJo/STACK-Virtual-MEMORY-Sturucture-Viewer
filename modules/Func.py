@@ -212,7 +212,7 @@ def modify_VARIABLE_chk_STACK(var, byte):
         if idx != [] : reset_RDistance_BP()
 
 
-def print_stack_v1(data, maxDataLen, PrintData):
+def print_stack_v1(data, maxDataLen, PrintData, idx):
         '''.....으로 대체'''
         LineNum = data['DLength'] // (C.EnvVar['regType'] // 8) + int(data['DLength'] % (C.EnvVar['regType'] // 8) != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
         
@@ -226,13 +226,17 @@ def print_stack_v1(data, maxDataLen, PrintData):
         
         print('|', PData, ' '*(maxDataLen-len(PData)), end='') # 마지막 줄에 데이터 출력.
         
-        sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
-        if data['RDistance(BP)'] == 0: print(f'| <= EBP')
-        else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        if C.EnvVar['Base'] == 'BP':
+                sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
+                if data['RDistance(BP)'] == 0: print('| <= {}BP'.format('E' if C.EnvVar['regType'] == 32 else 'R'))
+                else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        else:
+                if idx == len(C.STACK) - 1 : print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}SP')
+                else : print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}SP + {sum([d["DLength"] for d in C.STACK[idx + 1:]])}') #| <= EBP - N //OR// | <= EBP + N
         
         print('-' * (maxDataLen + 4))
 
-def print_stack_v2(data, maxDataLen, PrintData):
+def print_stack_v2(data, maxDataLen, PrintData, idx):
         '''복수줄에 표시.(4바이트 넘을 시.)'''
         LineNum = data['DLength'] // (C.EnvVar['regType'] // 8) + int(data['DLength'] % (C.EnvVar['regType'] // 8) != 0) #현 데이터당 출력 줄수 지정. data가 4바이트일 때까지 한 줄에 표시. data가 5바이트면 2줄.
         
@@ -251,8 +255,13 @@ def print_stack_v2(data, maxDataLen, PrintData):
         for _ in PData[:-1]: print('|', _, ' '*(maxDataLen-len(_)), end='|\n') # 데이터 출력.
         print('|', PData[-1], ' '*(maxDataLen-len(PData[-1])), end='') # 마지막 줄, 데이터 출력.
         
-        sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
-        if data['RDistance(BP)'] == 0: print('| <= {}BP'.format('E' if C.EnvVar['regType'] == 32 else 'R'))
-        else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        
+        if C.EnvVar['Base'] == 'BP':
+                sign = 1 if data["RDistance(BP)"] >= 0 else 0 #양수여부.
+                if data['RDistance(BP)'] == 0: print('| <= {}BP'.format('E' if C.EnvVar['regType'] == 32 else 'R'))
+                else: print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}BP {"+" if sign else "-"} {str(data["RDistance(BP)"])[0 if sign else 1:]}') #| <= EBP - N //OR// | <= EBP + N
+        else:
+                if idx == len(C.STACK) - 1 : print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}SP')
+                else : print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}SP + {sum([d["DLength"] for d in C.STACK[idx + 1:]])}') #| <= EBP - N //OR// | <= EBP + N
         
         print('-' * (maxDataLen + 4))
