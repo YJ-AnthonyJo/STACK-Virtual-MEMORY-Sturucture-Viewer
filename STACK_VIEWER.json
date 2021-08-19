@@ -1,0 +1,4 @@
+{
+    "STACK" : [{"data": "hello", "assignedVar": "", "RDistance(BP)": -5, "DLength": 5}, {"data": "test", "assignedVar": "", "RDistance(BP)": -9, "DLength": 4}],
+    "VARIABLES" : {}
+}
