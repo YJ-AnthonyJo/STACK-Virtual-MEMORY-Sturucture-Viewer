@@ -52,8 +52,12 @@ VARIABLES = {
 - int_max, int_min 등.. boundary값.
 
 """
+extra = [
+    'print env ', 'print env all', 'print all', 'push new ', 'push modify ',\
+    'pop new ', 'pop modify ', 'set new ', 'set modify ', 'set env '
+    ]
+commands = ["print ", "push ", "pop ", "set ", "clear ", 'quit ', 'delete ', 'save ', 'load ']
 
-commands = ["print", "push", "pop", "set", "clear", 'quit', 'delete', 'save', 'load']
 CMD = ''
 
 EnvVar = {
