@@ -1,5 +1,6 @@
 #! /usr/bin/python3
-import re, os, sys, json
+import re, os, sys, json, readline
+import atexit
 sys.path.append(os.path.join(sys.path[0],'modules'))
 
 import config as C
@@ -18,8 +19,11 @@ if __name__ == "__main__":
         C.EnvVar = _
     except:
         print('Error on Reading Envvars.json\nSet to Default.')
+    
+    AutoCmpt.init()
+    
     while True: 
-        C.CMD = AutoCmpt.init()
+        C.CMD = AutoCmpt.getCMD()
         if not C.CMD: pass # 입력이 공백이거나, 정의된 명령어가 아닐 때.
         elif re.match('print.*',C.CMD) : _print_.init()
         elif re.match('push .+', C.CMD): push.push()
