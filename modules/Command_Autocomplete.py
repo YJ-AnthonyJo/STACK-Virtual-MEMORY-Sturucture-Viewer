@@ -85,10 +85,11 @@ def init():
         readline.read_history_file('./.STACK_Viewer_history')
     atexit.register(readline.write_history_file, './.STACK_Viewer_history')
 
-    completer = Completer(C.commands + C.extra)
+    completer = Completer(C.commands + C.Cmd_Extended)
     readline.parse_and_bind('tab: complete')
     readline.set_completer(completer.complete)
-    readline.set_completion_display_matches_hook(completer.print_)
+    if os.name == 'posix':
+        readline.set_completion_display_matches_hook(completer.print_)
     readline.set_completer_delims(';')
     # ;을 기준으로 복수개의 명령 제공.
     # bash의 경우 두번째 인자는 무조건 파일로 인식하는 듯하다.

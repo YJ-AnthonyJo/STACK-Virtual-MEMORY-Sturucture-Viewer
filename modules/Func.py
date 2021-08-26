@@ -5,9 +5,7 @@ Contains Useful Function.
         check if string input as vairable name is correct to use according to python variable convention.
 
 '''
-import enum
-from os import linesep
-import re
+import re, json
 import inspect
 import config as C
 
@@ -34,7 +32,7 @@ def Calc_RDistance( byte ):
                         return C.STACK[-1]['RDistance(BP)'] + byte
                 else:
                         return C.STACK[-1]['RDistance(BP)'] - byte
-        else: return -byte
+        else: return byte # 원래 : -byte
 
 def reset_RDistance_BP():
         """STACK = [
@@ -106,14 +104,22 @@ def chk_var_in_VARIABLES(want, var): #want : 바람(원하는 것)
                         return True
 
 def LWS(byte, var):
-        if byte >= C.VARIABLES[var]['DLen']:
+        '''
+        LWS여부 판단 후 알맞은 데이터, 변수(assignedVar에 들어갈)이름 반환.
+        
+        :parm byte : var에서 시용할 바이트 크기
+        :parm var : 변수 이름
+        
+        :return data, assignedVar : STACK에 들어갈 데이터
+        '''
+        if byte >= C.VARIABLES[var].DLen:
                 # LWS 처리.
                 data = ''
                 var = var
-                C.VARIABLES[var]['type'] = 'STACKLink'
+                C.VARIABLES[var].type = 'STACKLink'
                 return data, var
         else:
-                data = C.VARIABLES[var]['data'][:byte]
+                data = C.VARIABLES[var].data[:byte]
                 var = ''
                 return data, var
 
@@ -268,3 +274,14 @@ def print_stack_v2(data, maxDataLen, PrintData, idx):
                 else : print(f'| <= {"E" if C.EnvVar["regType"] == 32 else "R"}SP + {sum([d["DLength"] for d in C.STACK[idx + 1:]])}') #| <= EBP - N //OR// | <= EBP + N
         
         print('-' * (maxDataLen + 4))
+
+def EnvVarInit():
+        try:
+                f = open('./modules/EnvVars.json')
+                s = f.read()
+                f.close()
+                
+                _ = json.loads(s)
+                C.EnvVar = _
+        except:
+                print('Error on Reading Envvars.json\nSet to Default.')

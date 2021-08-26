@@ -1,6 +1,5 @@
 #! /usr/bin/python3
-import re, os, sys, json, readline
-import atexit
+import re, os, sys
 sys.path.append(os.path.join(sys.path[0],'modules'))
 
 import config as C
@@ -10,16 +9,7 @@ import _set_, push, _print_, pop, delete, save, load
 
 
 if __name__ == "__main__":
-    try:
-        f = open('./modules/EnvVars.json')
-        s = f.read()
-        f.close()
-        
-        _ = json.loads(s)
-        C.EnvVar = _
-    except:
-        print('Error on Reading Envvars.json\nSet to Default.')
-    
+    EnvVarInit()
     AutoCmpt.init()
     
     while True: 
