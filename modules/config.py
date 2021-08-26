@@ -38,18 +38,19 @@ class STACK_(UserList):
                 )
     def __getitem__(self, i) -> (stack):
         return super().__getitem__(i)
-        
+    def pop(self) -> (stack):
+        return super().pop()
     
 
 class var(object):
     def __init__(s, 
                  data :str = '', 
                  DLen :int = None, 
-                 type_ :type = None
+                 type_ :str = ''
                  ):
         s.data : str = data
         s.DLen : int = DLen
-        s.type : type = type_
+        s.type : str = type_
     def __setitem__(self, key, item):
         if key in self.__dict__: self.__dict__[key] = item
         else: raise KeyError(key+'는 var의 Attribute가 아닙니다.')
