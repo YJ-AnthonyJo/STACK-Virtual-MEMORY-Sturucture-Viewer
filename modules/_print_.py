@@ -1,6 +1,8 @@
 import re, os
 import config as C
 from Func import *
+from _print_Func import *
+
 def init():
     '''
     print all : 모든 변수 정보 출력
@@ -9,52 +11,54 @@ def init():
     '''
     if C.CMD == 'print': #STACK출력
         print_stack()
-    elif re.match('print +all$', C.CMD): #모든 변수 출력
-        for name, data in C.VARIABLES.items():
+        return
+    
+    if re.match('print +all$', C.CMD): #모든 변수 출력
+        for name, data in C.VARIABLES.__dict__.items():
             print(f'${name}', '=', data)
+        return
 
-    else:
-        p = re.compile('print +(\d*):(\d*)$')
-        m = p.match(C.CMD)
-        if m: #범위지정 STACK출력 숫자(혹은 공백):숫자(혹은 공백) 의 경우만 실행됨.
-            from_ , to = [m.group(i) for i in [1,2]]
-            if from_ == '':
-                if to == '': #parm이 { : } 일 때
-                    from_, to = [None] * 2
-                else: 
-                    from_, to = [None, int(to)] #parm이 {:숫자} 일 때
-            elif to == '': #parm이 {숫자:}일 때
-                from_, to = [int(from_), None]
-            else: #parm이 {숫자:숫자}일 때
-                from_, to = [int(from_), int(to)]
-            print_stack(from_, to)
-            print(f"print {from_ if from_ != None else ''} : {to if to != None else ''}")
+    m = re.match(r'print +(\d*):(\d*)$', C.CMD)
+    if m: #범위지정 STACK출력 숫자(혹은 공백):숫자(혹은 공백) 의 경우만 실행됨.
+        from_ , to = [m.group(i) for i in [1,2]]
+        if from_ == '':
+            if to == '': #parm이 { : } 일 때
+                from_, to = [None] * 2
+            else: 
+                from_, to = [None, int(to)] #parm이 {:숫자} 일 때
+        elif to == '': #parm이 {숫자:}일 때
+            from_, to = [int(from_), None]
+        else: #parm이 {숫자:숫자}일 때
+            from_, to = [int(from_), int(to)]
+        print_stack(from_, to)
+        print(f"print {from_ if from_ != None else ''} : {to if to != None else ''}")
+        return
 
-        else: 
-            #변수출력.
-            p = re.compile('print +\$(.+)')
-            m = p.match(C.CMD)
-            if bool(m):
-                vari = m.group(1).strip()
-                if chk_valid_variable_name(vari):
-                    print(f"${vari}", '=' , C.VARIABLES[vari])
-            else:
-                #env 출력.
-                m = re.match('print +env +\$([^ ]+)', C.CMD)
-                m1 = re.match('^print +env +all$', C.CMD)
-                if m or m1:
-                    if m1 :
-                        print("*****ENVIRONMENTAL VARIABLES*****")
-                        for name, value in C.EnvVar.items():
-                            print(f'${name}', '=', value)
-                    elif m:
-                        env = m.group(1)
-                        if env in C.EnvVar:
-                            print(C.EnvVar[env])
-                        else:
-                            print("No such environmental variable. please 'print env all' to check all env")
-                else:
-                    ErrMsg('print')
+    #변수출력.
+    m = re.match(r'print +\$([^ ]+)$', C.CMD)
+    if m:
+        vari = m.group(1)
+        print(f"${vari}", '=' , C.VARIABLES[vari])
+        return
+    
+    m = re.match('print +env +\$([^ ]+)', C.CMD)
+    if m:
+        env = m.group(1)
+        if env in C.EnvVar:
+            print(C.EnvVar[env])
+        else:
+            print("No such environmental variable. please 'print env all' to check all env")
+        return
+    
+    m = re.match('print +env +all$', C.CMD)
+    if m:
+        print("*****ENVIRONMENTAL VARIABLES*****")
+        for name, value in C.EnvVar.items():
+            print(f'${name}', '=', value)
+        return
+            
+    ErrMsg('print')
+            
 
 
 def print_stack(from_ = None, to = None):
@@ -65,7 +69,8 @@ def print_stack(from_ = None, to = None):
     try:
         max_length = os.get_terminal_size()[0] #현재 terminal에서 최대로 출력가능한 값.
     except:
-        print("Can't get current window size. Mabye Running on IDLE.\nThat's OK. Just little inconvenience.😅")
+        # print("Can't get current window size. Mabye Running on IDLE.\nThat's OK. Just little inconvenience.😅")
+        print("경고 : 창 크기를 받아올 수 없음.")
         max_length = None
     
     default = 4 + 10 # | hello | <= EBP - 5에서 data, num부분 뺀 default 출력부. # 4는 |까지 부분. 10은 이후.
@@ -78,7 +83,7 @@ def print_stack(from_ = None, to = None):
     
     maxNum = get_max(
         lambda d : len(
-                str(d['RDistance(BP)']) [0 if d['RDistance(BP)'] >= 0 else 1 : ]
+                str(d['RDistance_BP']) [0 if d['RDistance_BP'] >= 0 else 1 : ]
             )
     ) # EBP뒤에 나올 최대 숫자 -> 문자열화 길이.
     
